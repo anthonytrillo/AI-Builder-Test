@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { Footer } from "@/components/shared/footer";
-import { Navbar } from "@/components/shared/navbar";
 import { env } from "@/lib/env";
 import "./globals.css";
 
@@ -20,7 +18,8 @@ export const metadata: Metadata = {
     default: env.NEXT_PUBLIC_APP_NAME,
     template: `%s | ${env.NEXT_PUBLIC_APP_NAME}`,
   },
-  description: "Production-ready Next.js 15 application",
+  description:
+    "Tu entrenamiento, más simple. Gym Tracker para entrenar con foco.",
   metadataBase: new URL(env.NEXT_PUBLIC_APP_URL),
 };
 
@@ -31,13 +30,11 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      lang="es"
+      className={`${geistSans.variable} ${geistMono.variable} h-full bg-background antialiased`}
     >
-      <body className="flex min-h-full flex-col bg-background font-sans text-foreground">
-        <Navbar />
+      <body className="min-h-full bg-background font-sans text-foreground">
         {children}
-        <Footer />
       </body>
     </html>
   );
