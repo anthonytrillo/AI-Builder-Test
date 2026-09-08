@@ -115,7 +115,7 @@ export function GymDashboard() {
                   Ejercicio actual · 01 / 05
                 </p>
                 <h2 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">
-                  Press de Banca con Barra
+                  Press de banca plano
                 </h2>
                 <p className="mt-2 text-sm text-zinc-400">
                   Última vez:{" "}
