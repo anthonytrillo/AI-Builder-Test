@@ -308,7 +308,7 @@ export function GymDashboard() {
       <div className="mt-8 grid gap-5 lg:grid-cols-[1.35fr_1fr]">
         <section className="rounded-3xl border border-emerald-500/25 bg-zinc-900 p-6 shadow-[0_20px_60px_-30px_rgba(16,185,129,0.4)] sm:p-8">
           <span className="rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-emerald-400">
-            Entrenamiento de hoy
+            Entrenamiento de hoy de la semana
           </span>
           <p className="mt-8 text-sm text-zinc-400">Día 1</p>
           <h2 className="mt-1 text-3xl font-bold tracking-tight text-zinc-50">
