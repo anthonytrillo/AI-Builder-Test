@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {
   ArrowLeft,
   Check,
@@ -18,6 +19,8 @@ import {
   X,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { useAuthSession } from "@/hooks/use-auth-session";
+import { clearAuthSession } from "@/lib/auth-storage";
 
 const initialSets = [
   { id: 1, weight: "80", reps: "10", status: "done" },
@@ -49,6 +52,7 @@ function formatTime(seconds: number) {
 }
 
 export function GymDashboard() {
+  const session = useAuthSession();
   const [started, setStarted] = useState(false);
   const [elapsed, setElapsed] = useState(24 * 60 + 15);
   const [rest, setRest] = useState(90);
@@ -76,6 +80,7 @@ export function GymDashboard() {
     () => sets.filter((set) => set.status === "done").length,
     [sets],
   );
+  const greetingName = session?.fullName.split(" ").find(Boolean) ?? "Alex";
 
   if (started) {
     return (
@@ -292,18 +297,28 @@ export function GymDashboard() {
             LUNES, 14 DE OCTUBRE
           </p>
           <h1 className="mt-2 text-3xl font-bold tracking-tight text-zinc-50 sm:text-4xl">
-            ¡Hola, Alex!
+            ¡Hola, {greetingName}!
           </h1>
           <p className="mt-1 text-sm leading-6 text-zinc-400">
-            Listo para entrenar hoy
+            {session ? "Sesión iniciada" : "Listo para entrenar hoy"}
           </p>
+          {session ? (
+            <button
+              type="button"
+              onClick={() => clearAuthSession()}
+              className="mt-2 text-xs font-semibold text-zinc-500 hover:text-zinc-200"
+            >
+              Cerrar sesión
+            </button>
+          ) : null}
         </div>
-        <button
-          aria-label="Abrir perfil"
+        <Link
+          href="/login"
+          aria-label={session ? "Cuenta" : "Iniciar sesión"}
           className="rounded-full border border-zinc-700 bg-zinc-900 p-2 text-zinc-300 hover:border-emerald-400 hover:text-emerald-400"
         >
           <CircleUserRound className="size-6" />
-        </button>
+        </Link>
       </header>
       <div className="mt-8 grid gap-5 lg:grid-cols-[1.35fr_1fr]">
         <section className="rounded-3xl border border-emerald-500/25 bg-zinc-900 p-6 shadow-[0_20px_60px_-30px_rgba(16,185,129,0.4)] sm:p-8">
@@ -425,10 +440,13 @@ export function GymDashboard() {
           <Dumbbell className="size-5" />
           <span>Inicio</span>
         </button>
-        <button className="flex min-w-16 flex-col items-center gap-1 rounded-xl px-3 py-2 text-[10px] font-medium text-zinc-500">
+        <Link
+          href="/login"
+          className="flex min-w-16 flex-col items-center gap-1 rounded-xl px-3 py-2 text-[10px] font-medium text-zinc-500"
+        >
           <UserRound className="size-5" />
-          <span>Perfil</span>
-        </button>
+          <span>{session ? "Cuenta" : "Perfil"}</span>
+        </Link>
       </nav>
     </main>
   );
