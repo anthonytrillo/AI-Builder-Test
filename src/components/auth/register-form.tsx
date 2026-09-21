@@ -5,8 +5,8 @@ import { Check, Eye, EyeOff, LoaderCircle, UserPlus } from "lucide-react";
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { useForm, useWatch, type FieldError } from "react-hook-form";
+import { registerAccount } from "@/app/actions/auth";
 import { Button } from "@/components/ui/button";
-import { DuplicateEmailError, appendRegisteredUser } from "@/lib/auth-storage";
 import { cn } from "@/lib/utils";
 import {
   PASSWORD_RULES,
@@ -15,16 +15,8 @@ import {
   type RegisterFormValues,
 } from "@/lib/validations/register";
 
-const SAVE_DELAY_MS = 1000;
-
 const inputClassName =
   "h-12 w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 text-sm text-zinc-50 outline-none transition placeholder:text-zinc-600 focus:border-emerald-400 disabled:opacity-60";
-
-function wait(ms: number) {
-  return new Promise<void>((resolve) => {
-    window.setTimeout(resolve, ms);
-  });
-}
 
 function getErrorMessages(error: FieldError | undefined): string[] {
   if (!error) return [];
@@ -51,6 +43,7 @@ export function RegisterForm() {
   const [confirmation, setConfirmation] = useState<string | null>(null);
 
   const {
+    clearErrors,
     control,
     register,
     handleSubmit,
@@ -117,27 +110,26 @@ export function RegisterForm() {
     setIsSaving(true);
 
     try {
-      await wait(SAVE_DELAY_MS);
+      const result = await registerAccount(values);
 
-      const users = appendRegisteredUser({
-        fullName: values.fullName,
-        email: values.email,
-        password: values.password,
-      });
+      if (!result.ok) {
+        if (result.field) {
+          setError(result.field, { type: "server", message: result.message });
+          return;
+        }
 
-      setConfirmation(
-        `Cuenta creada para ${values.fullName}. Hay ${users.length} ${users.length === 1 ? "registro guardado" : "registros guardados"} en este dispositivo.`,
-      );
-      reset(registerDefaultValues);
-    } catch (error) {
-      if (error instanceof DuplicateEmailError) {
-        setError("email", { type: "duplicate", message: error.message });
+        setError("root", { type: "server", message: result.message });
         return;
       }
 
+      setConfirmation(
+        `Cuenta creada para ${result.fullName}. Ya puedes iniciar sesión.`,
+      );
+      reset(registerDefaultValues);
+    } catch {
       setError("root", {
-        type: "storage",
-        message: "No se pudo guardar la cuenta en este dispositivo.",
+        type: "server",
+        message: "No se pudo crear la cuenta. Inténtalo de nuevo.",
       });
     } finally {
       setIsSaving(false);
@@ -177,7 +169,7 @@ export function RegisterForm() {
         Crear cuenta
       </h1>
       <p className="mt-2 text-sm leading-6 text-zinc-400">
-        Registra tus datos para guardar tu perfil en este dispositivo.
+        Registra tus datos para guardar tu perfil.
       </p>
 
       {confirmation ? (
@@ -190,7 +182,12 @@ export function RegisterForm() {
         </div>
       ) : null}
 
-      <form className="mt-8 space-y-5" noValidate onSubmit={onSubmit}>
+      <form
+        className="mt-8 space-y-5"
+        noValidate
+        onChange={() => clearErrors("root")}
+        onSubmit={onSubmit}
+      >
         <div>
           <label
             htmlFor="fullName"

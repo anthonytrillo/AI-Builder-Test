@@ -1,26 +1,34 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { getAuthSession } from "@/app/actions/auth";
 import {
   AUTH_SESSION_EVENT,
-  readAuthSession,
+  clearLegacyAuthStorage,
   type AuthSession,
-} from "@/lib/auth-storage";
+} from "@/lib/auth-session";
 
-export function useAuthSession(): AuthSession | null {
-  const [session, setSession] = useState<AuthSession | null>(null);
+export function useAuthSession(
+  initialSession: AuthSession | null = null,
+): AuthSession | null {
+  const [session, setSession] = useState<AuthSession | null>(initialSession);
 
   useEffect(() => {
+    clearLegacyAuthStorage();
+
+    let active = true;
+
     const syncSession = () => {
-      setSession(readAuthSession());
+      void getAuthSession().then((nextSession) => {
+        if (active) setSession(nextSession);
+      });
     };
 
     syncSession();
-    window.addEventListener("storage", syncSession);
     window.addEventListener(AUTH_SESSION_EVENT, syncSession);
 
     return () => {
-      window.removeEventListener("storage", syncSession);
+      active = false;
       window.removeEventListener(AUTH_SESSION_EVENT, syncSession);
     };
   }, []);

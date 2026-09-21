@@ -19,8 +19,9 @@ import {
   X,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { logoutAccount } from "@/app/actions/auth";
 import { useAuthSession } from "@/hooks/use-auth-session";
-import { clearAuthSession } from "@/lib/auth-storage";
+import { AUTH_SESSION_EVENT, type AuthSession } from "@/lib/auth-session";
 
 const initialSets = [
   { id: 1, weight: "80", reps: "10", status: "done" },
@@ -51,8 +52,12 @@ function formatTime(seconds: number) {
   return `${minutes}:${(seconds % 60).toString().padStart(2, "0")}`;
 }
 
-export function GymDashboard() {
-  const session = useAuthSession();
+export function GymDashboard({
+  initialSession = null,
+}: {
+  initialSession?: AuthSession | null;
+}) {
+  const session = useAuthSession(initialSession);
   const [started, setStarted] = useState(false);
   const [elapsed, setElapsed] = useState(24 * 60 + 15);
   const [rest, setRest] = useState(90);
@@ -305,7 +310,11 @@ export function GymDashboard() {
           {session ? (
             <button
               type="button"
-              onClick={() => clearAuthSession()}
+              onClick={() => {
+                void logoutAccount().finally(() => {
+                  window.dispatchEvent(new Event(AUTH_SESSION_EVENT));
+                });
+              }}
               className="mt-2 text-xs font-semibold text-zinc-500 hover:text-zinc-200"
             >
               Cerrar sesión

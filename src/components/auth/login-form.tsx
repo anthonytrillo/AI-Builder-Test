@@ -6,33 +6,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { loginAccount } from "@/app/actions/auth";
 import { Button } from "@/components/ui/button";
-import { findRegisteredUser, saveAuthSession } from "@/lib/auth-storage";
-
-const AUTH_CHECK_DELAY_MS = 1000;
-
-const loginSchema = z.object({
-  email: z
-    .string()
-    .trim()
-    .min(1, "El correo es obligatorio")
-    .email("Ingresa un correo válido"),
-  password: z.string().min(1, "La contraseña es obligatoria"),
-});
-
-type LoginFormValues = z.infer<typeof loginSchema>;
-
-const loginDefaultValues: LoginFormValues = {
-  email: "",
-  password: "",
-};
-
-function wait(ms: number) {
-  return new Promise<void>((resolve) => {
-    window.setTimeout(resolve, ms);
-  });
-}
+import {
+  loginDefaultValues,
+  loginSchema,
+  type LoginFormValues,
+} from "@/lib/validations/login";
 
 export function LoginForm() {
   const router = useRouter();
@@ -75,16 +55,13 @@ export function LoginForm() {
     let didAuthenticate = false;
 
     try {
-      await wait(AUTH_CHECK_DELAY_MS);
+      const result = await loginAccount(values);
 
-      const user = findRegisteredUser(values.email, values.password);
-
-      if (!user) {
-        setAuthError("El correo o la contraseña no son correctos.");
+      if (!result.ok) {
+        setAuthError(result.message);
         return;
       }
 
-      saveAuthSession(user);
       didAuthenticate = true;
       router.push("/");
     } finally {
