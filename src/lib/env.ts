@@ -12,7 +12,7 @@ const serverSchema = z.object({
   NODE_ENV: z
     .enum(["development", "test", "production"])
     .default("development"),
-  DATABASE_URL: z.string().url().optional(),
+  DATABASE_URL: z.preprocess(emptyToUndefined, z.string().min(1).optional()),
   API_SECRET_KEY: z.string().min(1).optional(),
 });
 
