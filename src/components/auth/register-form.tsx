@@ -200,7 +200,7 @@ export function RegisterForm() {
             id="fullName"
             type="text"
             autoComplete="name"
-            placeholder="Ana Pérez"
+            placeholder="Ana Fernández"
             disabled={isBusy}
             aria-invalid={errors.fullName ? true : undefined}
             aria-required="true"

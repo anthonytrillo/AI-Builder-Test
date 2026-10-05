@@ -214,6 +214,14 @@ export function LoginForm() {
           Crear cuenta
         </Link>
       </p>
+      <p className="mt-3 text-center text-sm text-zinc-500">
+        <Link
+          href="/"
+          className="font-semibold text-zinc-300 hover:text-zinc-50"
+        >
+          Continuar como invitado
+        </Link>
+      </p>
     </section>
   );
 }
