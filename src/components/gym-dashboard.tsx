@@ -14,12 +14,14 @@ import {
   Play,
   Plus,
   SkipForward,
+  Sparkles,
   TimerReset,
   UserRound,
   X,
 } from "lucide-react";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { logoutAccount } from "@/app/actions/auth";
+import { requestSessionCoach } from "@/app/actions/coach";
 import { saveFinishedWorkout } from "@/app/actions/workouts";
 import {
   addSet,
@@ -40,6 +42,7 @@ import {
   type ActiveWorkout,
 } from "@/lib/active-workout";
 import { AUTH_SESSION_EVENT, type AuthSession } from "@/lib/auth-session";
+import type { CoachAdvice } from "@/lib/coach-result";
 import type { WorkoutHistoryEntry, WorkoutHome } from "@/lib/workout-home";
 
 function formatTime(seconds: number) {
@@ -119,6 +122,9 @@ export function GymDashboard({
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [showHistory, setShowHistory] = useState(false);
+  const [coachAdvice, setCoachAdvice] = useState<CoachAdvice | null>(null);
+  const [coachError, setCoachError] = useState<string | null>(null);
+  const [coachLoading, setCoachLoading] = useState(false);
   const shouldTick = Boolean(workout?.resumedAt || workout?.restResumedAt);
 
   useEffect(() => {
@@ -195,6 +201,24 @@ export function GymDashboard({
     setConfirmingFinish(false);
     setSaving(false);
     router.refresh();
+  }
+
+  async function askCoach() {
+    if (coachLoading) return;
+
+    setCoachLoading(true);
+    setCoachError(null);
+
+    const result = await requestSessionCoach();
+
+    if (!result.ok) {
+      setCoachError(result.message);
+      setCoachLoading(false);
+      return;
+    }
+
+    setCoachAdvice(result.advice);
+    setCoachLoading(false);
   }
 
   if (workout?.open) {
@@ -613,6 +637,30 @@ export function GymDashboard({
               </p>
             </div>
             <SessionStats entry={latestSession} />
+            <button
+              type="button"
+              disabled={coachLoading}
+              onClick={() => void askCoach()}
+              className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-emerald-400 disabled:opacity-60"
+            >
+              <Sparkles className="size-4" />
+              {coachLoading ? "Pensando..." : "Pedir consejo"}
+            </button>
+            {coachError ? (
+              <p className="mt-3 text-sm text-red-300">{coachError}</p>
+            ) : null}
+            {coachAdvice ? (
+              <div className="mt-4 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-4">
+                <p className="text-sm leading-6 text-zinc-200">
+                  {coachAdvice.summary}
+                </p>
+                <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-6 text-zinc-300">
+                  {coachAdvice.tips.map((tip) => (
+                    <li key={tip}>{tip}</li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
             {workoutHome.history.length > 1 ? (
               <button
                 type="button"

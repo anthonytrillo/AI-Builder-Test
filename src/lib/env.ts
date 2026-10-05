@@ -14,6 +14,7 @@ const serverSchema = z.object({
     .default("development"),
   DATABASE_URL: z.preprocess(emptyToUndefined, z.string().min(1).optional()),
   API_SECRET_KEY: z.string().min(1).optional(),
+  GEMINI_API_KEY: z.preprocess(emptyToUndefined, z.string().min(1).optional()),
 });
 
 const clientSchema = z.object({
