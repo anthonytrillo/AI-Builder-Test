@@ -443,7 +443,7 @@ export function GymDashboard({
                 }
                 className="hidden rounded-lg border border-zinc-700 px-3 py-2 text-xs font-semibold text-zinc-300 hover:border-amber-400 hover:text-amber-300 sm:block"
               >
-                +30s
+                +60s
               </button>
               <button
                 type="button"
